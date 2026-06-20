@@ -6,7 +6,7 @@ Built for Kaggle's **AI Agents: Intensive Vibe Coding Capstone Project**, track:
 
 ## Why this exists
 
-Teams are shipping AI agents faster than they can review them. An agent with tool access (file reads, shell execution, API calls) inherits real risk: hardcoded secrets left in during rapid prototyping, prompt injection via untrusted input, and tools with more permission than the agent's job requires. GuardianLLM Lite is a repeatable, automated check for exactly these issues — built using the same patterns Google's own course teaches for *defending* agents, turned into a tool that *audits* them.
+Teams are shipping AI agents faster than they can review them. An agent with tool access (file reads, shell execution, API calls) inherits real risk: hardcoded secrets left in during rapid prototyping, prompt injection via untrusted input, and tools with more permission than the agent's job requires. GuardianLLM Lite is a repeatable, automated check for exactly these issues — built using the same patterns Google's own course teaches for _defending_ agents, turned into a tool that _audits_ them.
 
 ## How it works
 
@@ -31,11 +31,11 @@ Full architecture details: [`docs/architecture.md`](docs/architecture.md)
 
 ## Course concepts demonstrated
 
-| Concept | Where |
-|---|---|
+| Concept                          | Where                                                                                   |
+| -------------------------------- | --------------------------------------------------------------------------------------- |
 | Agent / Multi-agent system (ADK) | `app/agent.py` — full ADK 2.0 graph `Workflow` with deterministic nodes and `LlmAgent`s |
-| Security features | `app/agent.py` (`security_screen_node`), `tests/test_security_screen.py` |
-| Agent skills (Agents CLI) | `.agents/skills/agent-security-audit/SKILL.md` — installable in any Antigravity project |
+| Security features                | `app/agent.py` (`security_screen_node`), `tests/test_security_screen.py`                |
+| Agent skills (Agents CLI)        | `.agents/skills/agent-security-audit/SKILL.md` — installable in any Antigravity project |
 
 ## Setup (takes about 5 minutes)
 
@@ -43,7 +43,7 @@ Full architecture details: [`docs/architecture.md`](docs/architecture.md)
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/<your-username>/guardianllm-lite.git
+git clone https://github.com/KaustubhMukdam/guardianllm-lite.git
 cd guardianllm-lite
 
 # 2. Set up your environment
@@ -77,7 +77,3 @@ Full documentation, including the PRD, tech stack rationale, and task log, is in
 ## A note on cost and access
 
 This project runs entirely free of cost — no Google Cloud billing, no Agent Runtime deployment. It requires only a free Gemini API key, the same one every participant in the underlying Kaggle course already obtained. No API keys or secrets are committed to this repository.
-
-## License
-
-[Choose a license — MIT recommended for a portfolio/competition project]

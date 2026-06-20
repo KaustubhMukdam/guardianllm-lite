@@ -22,4 +22,7 @@ deployment_metadata.json
 .vscode/
 .idea/
 
-docs/
+docs/design_prompt.md
+docs/learnings.md
+docs/project_context.md
+docs/tasks.md
