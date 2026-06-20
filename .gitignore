@@ -1,0 +1,25 @@
+# Secrets — never commit
+.env
+*.env.local
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.uv/
+
+# ADK / agents-cli local artifacts
+artifacts/
+deployment_metadata.json
+
+# OS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+docs/
