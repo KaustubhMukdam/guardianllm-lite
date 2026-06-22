@@ -19,7 +19,7 @@ MODEL_NAME = "gemini-2.5-flash"
 
 # Regex patterns for common secrets and credentials
 SECRET_PATTERNS = {
-    "Google API Key": re.compile(r"AIzaSy[A-Za-z0-9-_]{35}"),
+    "Google API Key": re.compile(r"AIzaSy[A-Za-z0-9-_]{33,35}"),
     "AWS Access Key ID": re.compile(r"ASCA[0-9A-Z]{16}|AKIA[0-9A-Z]{16}"),
     "AWS Secret Access Key": re.compile(
         r"(?<![A-Za-z0-9+/])[A-Za-z0-9+/]{40}(?![A-Za-z0-9+/])"
