@@ -1,79 +1,89 @@
-# GuardianLLM Lite
+# temp-scaffold
 
-An ADK 2.0 multi-agent workflow that audits AI agents for security vulnerabilities — hardcoded secrets, prompt-injection-susceptible system prompts, and over-privileged tools — before they ship.
+Simple ReAct agent
+Agent generated with `agents-cli` version `0.5.0`
 
-Built for Kaggle's **AI Agents: Intensive Vibe Coding Capstone Project**, track: **Agents for Business**.
-
-## Why this exists
-
-Teams are shipping AI agents faster than they can review them. An agent with tool access (file reads, shell execution, API calls) inherits real risk: hardcoded secrets left in during rapid prototyping, prompt injection via untrusted input, and tools with more permission than the agent's job requires. GuardianLLM Lite is a repeatable, automated check for exactly these issues — built using the same patterns Google's own course teaches for _defending_ agents, turned into a tool that _audits_ them.
-
-## How it works
+## Project Structure
 
 ```
-[target agent's repo]
-        |
-        v
-  intake_node ───► security_screen_node (deterministic secret scan)
-                          |
-              secrets found ──► reporting_node ──► audit_report.md
-                          |
-                       clean
-                          |
-                          v
-         injection_scanner_agent (LLM) ──► privilege_analyzer_agent (LLM)
-                          |
-                          v
-                   reporting_node ──► audit_report.md
+temp-scaffold/
+├── app/         # Core agent code
+│   ├── agent.py               # Main agent logic
+│   ├── agent_runtime_app.py    # Agent Runtime application logic
+│   └── app_utils/             # App utilities and helpers
+├── tests/                     # Unit, integration, and load tests
+├── GEMINI.md                  # AI-assisted development guide
+└── pyproject.toml             # Project dependencies
 ```
 
-Full architecture details: [`docs/architecture.md`](docs/architecture.md)
+> 💡 **Tip:** Use [Gemini CLI](https://github.com/google-gemini/gemini-cli) for AI-assisted development - project context is pre-configured in `GEMINI.md`.
 
-## Course concepts demonstrated
+## Requirements
 
-| Concept                          | Where                                                                                   |
-| -------------------------------- | --------------------------------------------------------------------------------------- |
-| Agent / Multi-agent system (ADK) | `app/agent.py` — full ADK 2.0 graph `Workflow` with deterministic nodes and `LlmAgent`s |
-| Security features                | `app/agent.py` (`security_screen_node`), `tests/test_security_screen.py`                |
-| Agent skills (Agents CLI)        | `.agents/skills/agent-security-audit/SKILL.md` — installable in any Antigravity project |
+Before you begin, ensure you have:
+- **uv**: Python package manager (used for all dependency management in this project) - [Install](https://docs.astral.sh/uv/getting-started/installation/) ([add packages](https://docs.astral.sh/uv/concepts/dependencies/) with `uv add <package>`)
+- **agents-cli**: Agents CLI - Install with `uv tool install google-agents-cli`
+- **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
 
-## Setup (takes about 5 minutes)
 
-**Prerequisites:** Python 3.11+, [`uv`](https://docs.astral.sh/uv/getting-started/installation/), a free [Google AI Studio API key](https://aistudio.google.com/app/apikey).
+## Quick Start
+
+Install `agents-cli` and its skills if not already installed:
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/KaustubhMukdam/guardianllm-lite.git
-cd guardianllm-lite
+uvx google-agents-cli setup
+```
 
-# 2. Set up your environment
-cp .env.example .env
-# edit .env and paste in your own GEMINI_API_KEY
+Install required packages:
 
-# 3. Install dependencies
-uv sync
+```bash
+agents-cli install
+```
 
-# 4. Run the local playground
+Test the agent with a local web server:
+
+```bash
 agents-cli playground
 ```
 
-Open the printed URL (usually `http://127.0.0.1:8080/dev-ui/?app=app`), select the `app` folder, and point the auditor at `sample_target_agent/` — a deliberately vulnerable mock agent included in this repo for demo purposes.
+You can also use features from the [ADK](https://adk.dev/) CLI with `uv run adk`.
 
-## Running tests
+## Commands
+
+| Command              | Description                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| `agents-cli install` | Install dependencies using uv                                                         |
+| `agents-cli playground` | Launch local development environment                                                  |
+| `agents-cli lint`    | Run code quality checks                                                               |
+| `agents-cli eval`    | Evaluate agent behavior (generate, grade, analyze, and more — see `agents-cli eval --help`) |
+| `uv run pytest tests/unit tests/integration` | Run unit and integration tests                                                        |
+| `agents-cli deploy`  | Deploy agent to Agent Runtime                                                                |
+| `agents-cli publish gemini-enterprise` | Register deployed agent to Gemini Enterprise                    |
+
+## 🛠️ Project Management
+
+| Command | What It Does |
+|---------|--------------|
+| `agents-cli scaffold enhance` | Add CI/CD pipelines and Terraform infrastructure |
+| `agents-cli infra cicd` | One-command setup of entire CI/CD pipeline + infrastructure |
+| `agents-cli scaffold upgrade` | Auto-upgrade to latest version while preserving customizations |
+
+---
+
+## Development
+
+Edit your agent logic in `app/agent.py` and test with `agents-cli playground` - it auto-reloads on save.
+
+## Deployment
 
 ```bash
-uv run pytest tests/
+gcloud config set project <your-project-id>
+agents-cli deploy
 ```
 
-## Project documentation
+To add CI/CD and Terraform, run `agents-cli scaffold enhance`.
+To set up your production infrastructure, run `agents-cli infra cicd`.
 
-Full documentation, including the PRD, tech stack rationale, and task log, is in [`docs/`](docs/):
+## Observability
 
-- [`docs/PRD.md`](docs/PRD.md) — problem statement, target users, scope
-- [`docs/tech_stack.md`](docs/tech_stack.md) — every technology choice and why
-- [`docs/architecture.md`](docs/architecture.md) — full system design and data flow
-- [`docs/folder_structure.md`](docs/folder_structure.md) — repo layout explained
-
-## A note on cost and access
-
-This project runs entirely free of cost — no Google Cloud billing, no Agent Runtime deployment. It requires only a free Gemini API key, the same one every participant in the underlying Kaggle course already obtained. No API keys or secrets are committed to this repository.
+Built-in telemetry exports to Cloud Trace, BigQuery, and Cloud Logging.
