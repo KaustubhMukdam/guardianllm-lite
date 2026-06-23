@@ -13,3 +13,6 @@ if project_root not in sys.path:
 
 # Load env variables
 load_dotenv(os.path.join(project_root, ".env"))
+
+# Force mock LLM for all tests to ensure they run offline and fast
+os.environ["USE_MOCK_LLM"] = "TRUE"

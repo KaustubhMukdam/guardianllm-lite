@@ -41,6 +41,14 @@ GuardianLLM Lite is an ADK 2.0 graph `Workflow` that takes a target agent's proj
 - **Skill entry point**: `.agents/skills/agent-security-audit/SKILL.md` — discovered automatically by Antigravity when a user's prompt matches the skill's description (e.g. "audit this agent for security issues").
 - **Output interface**: a single `audit_report.md` written to the target project's root, plus the full structured findings returned as the workflow's final `Event` data (for programmatic use / tests).
 
+## Seams and Adapters
+
+### Model Seam
+To decouple the workflow graph from the live Gemini API during testing, we introduced a **Model Seam** at the LLM agent instantiation level:
+- **Interface**: Implemented by subclassing `google.adk.models.base_llm.BaseLlm` and implementing `generate_content_async`.
+- **Production Adapter**: Uses the real `Gemini` API client to execute live prompt injection scans and privilege analysis.
+- **Testing Adapter**: Uses the custom `MockLlm` class (defined in [mock_llm.py](file:///d:/Programming/kaggle-portfolio/5-day-ai-agent-vibe-coding/capstone-project/guardianllm-lite/app/mock_llm.py)), which intercepts agent requests and returns pre-canned JSON payloads. This eliminates external network dependencies, rate limits, and API key requirements during local pytest executions.
+
 ## Security considerations
 - [ ] `GEMINI_API_KEY` read only from environment variables (`.env`, gitignored) — never hardcoded, never logged.
 - [ ] The auditor itself must pass its own audit (dogfooding) — no hardcoded secrets in `app/agent.py`, no over-privileged tools beyond local file reads required for intake.

@@ -308,14 +308,28 @@ def security_screen_node(ctx: Context, node_input: dict) -> Event:
     )
 
 
+# Conditionally choose model (Model Seam)
+if os.environ.get("USE_MOCK_LLM") == "TRUE":
+    from app.mock_llm import MockLlm
+
+    scanner_model = MockLlm()
+    analyzer_model = MockLlm()
+else:
+    scanner_model = Gemini(
+        model=MODEL_NAME,
+        retry_options=types.HttpRetryOptions(attempts=3),
+    )
+    analyzer_model = Gemini(
+        model=MODEL_NAME,
+        retry_options=types.HttpRetryOptions(attempts=3),
+    )
+
+
 # 3. Injection Scanner Agent (LLM)
 # Analyzes susceptibility to prompt injection and jailbreaking
 injection_scanner_agent = LlmAgent(
     name="injection_scanner_agent",
-    model=Gemini(
-        model=MODEL_NAME,
-        retry_options=types.HttpRetryOptions(attempts=3),
-    ),
+    model=scanner_model,
     instruction="""You are a security auditor specializing in prompt injection and jailbreaking vulnerabilities in AI agents.
 Your task is to analyze the target agent's system instructions and evaluate if it is susceptible to prompt injection.
 
@@ -338,10 +352,7 @@ You must output a structured JSON response matching the schema provided, indicat
 # Analyzes tools for over-broad permissions
 privilege_analyzer_agent = LlmAgent(
     name="privilege_analyzer_agent",
-    model=Gemini(
-        model=MODEL_NAME,
-        retry_options=types.HttpRetryOptions(attempts=3),
-    ),
+    model=analyzer_model,
     instruction="""You are a security auditor specializing in analyzing tool permissions and privilege levels in AI agents.
 Your task is to analyze the target agent's tools (function signatures, docstrings, and code implementation if available) for over-broad permissions.
 

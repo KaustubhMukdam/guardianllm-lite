@@ -3,6 +3,9 @@
 
 import os
 
+# Enable the offline Model Seam before importing the agent app
+os.environ["USE_MOCK_LLM"] = "TRUE"
+
 import pytest
 from google.adk.runners import InMemoryRunner
 from google.genai import types
@@ -50,55 +53,39 @@ async def test_audit_vulnerable_agent():
 
 @pytest.mark.asyncio
 async def test_audit_clean_agent():
-    """Verify that auditing a clean directory runs the LLM scans successfully."""
-    import asyncio
-    import logging
-    from google.genai.errors import ClientError, ServerError
-    
+    """Verify that auditing a clean directory runs the LLM scans successfully using mock adapter."""
     project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
     target_path = os.path.join(project_root, "app")
-    
+
     # Remove any existing report from previous runs
     report_file = os.path.join(target_path, "audit_report.md")
     if os.path.exists(report_file):
         os.remove(report_file)
-        
+
     runner = InMemoryRunner(app=app)
     session = await runner.session_service.create_session(
         app_name="guardianllm_lite", user_id="test_user"
     )
-    
+
     report_content = None
-    attempts = 3
-    for attempt in range(attempts):
-        try:
-            async for event in runner.run_async(
-                user_id="test_user",
-                session_id=session.id,
-                new_message=types.Content(
-                    role="user",
-                    parts=[types.Part.from_text(text=target_path)],
-                ),
-            ):
-                if event.output is not None:
-                    report_content = event.output
-            break
-        except (ClientError, ServerError, Exception) as e:
-            # Catch general API errors/exceptions and retry unless it's the last attempt
-            if attempt == attempts - 1:
-                raise e
-            logging.warning(
-                f"Gemini API rate limited or server error, retrying in 12s... (attempt {attempt + 1}/{attempts})"
-            )
-            await asyncio.sleep(12)
-            
+    async for event in runner.run_async(
+        user_id="test_user",
+        session_id=session.id,
+        new_message=types.Content(
+            role="user",
+            parts=[types.Part.from_text(text=target_path)],
+        ),
+    ):
+        if event.output is not None:
+            report_content = event.output
+
     assert report_content is not None, "Failed to get audit report"
     assert "Secrets & API Keys" in report_content
     assert "Clean" in report_content
     assert "## 🛡️ Injection Scanner Agent" in report_content
     assert "## 🔑 Privilege Analyzer Agent" in report_content
     assert os.path.exists(report_file), "Audit report file was not written to disk"
-    
+
     # Clean up
     if os.path.exists(report_file):
         os.remove(report_file)
