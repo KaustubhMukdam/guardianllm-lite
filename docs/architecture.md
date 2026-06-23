@@ -49,6 +49,12 @@ To decouple the workflow graph from the live Gemini API during testing, we intro
 - **Production Adapter**: Uses the real `Gemini` API client to execute live prompt injection scans and privilege analysis.
 - **Testing Adapter**: Uses the custom `MockLlm` class (defined in [mock_llm.py](file:///d:/Programming/kaggle-portfolio/5-day-ai-agent-vibe-coding/capstone-project/guardianllm-lite/app/mock_llm.py)), which intercepts agent requests and returns pre-canned JSON payloads. This eliminates external network dependencies, rate limits, and API key requirements during local pytest executions.
 
+### Static Analysis Modules
+To isolate deterministic processing logic from the ADK framework, we extracted static parsing and scanning functionality into pure, framework-agnostic modules:
+- **Intake Module** ([intake.py](file:///d:/Programming/kaggle-portfolio/5-day-ai-agent-vibe-coding/capstone-project/guardianllm-lite/app/intake.py)): Traverses directories, reads python files, and parses AST structures to extract system instructions and function-based tool representations.
+- **Scanner Module** ([scanner.py](file:///d:/Programming/kaggle-portfolio/5-day-ai-agent-vibe-coding/capstone-project/guardianllm-lite/app/scanner.py)): Performs regex-based line-by-line pattern matching to detect hardcoded secrets and API keys.
+- **Framework Independence**: Decoupling these modules allows them to be unit tested directly without requiring ADK `Context` objects, node decorators, or running an active event loop.
+
 ## Security considerations
 - [ ] `GEMINI_API_KEY` read only from environment variables (`.env`, gitignored) — never hardcoded, never logged.
 - [ ] The auditor itself must pass its own audit (dogfooding) — no hardcoded secrets in `app/agent.py`, no over-privileged tools beyond local file reads required for intake.

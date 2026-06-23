@@ -3,6 +3,8 @@
 
 from app.agent import security_screen_node
 from app.config import SECRET_PATTERNS
+from app.intake import parse_target_directory
+from app.scanner import scan_code_for_secrets
 
 
 def test_google_api_key_regex():
@@ -94,3 +96,38 @@ def test_security_screen_node_routing_secrets_found():
     assert event.actions.state_delta["secrets_found"] is True
     assert len(event.output["findings"]) == 1
     assert event.output["findings"][0]["type"] == "Google API Key"
+
+
+def test_direct_scan_code_for_secrets():
+    # Test clean code
+    findings = scan_code_for_secrets("def hello():\n    pass")
+    assert len(findings) == 0
+
+    # Test code with secrets
+    code_with_secret = (
+        "# File: test_agent.py\n"
+        "GOOGLE_KEY = 'AIzaSyA1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q'\n"
+    )
+    findings = scan_code_for_secrets(code_with_secret)
+    assert len(findings) == 1
+    assert findings[0]["file"] == "test_agent.py"
+    assert findings[0]["line"] == 2
+    assert findings[0]["type"] == "Google API Key"
+
+
+def test_direct_parse_target_directory():
+    # Test non-existent directory
+    res = parse_target_directory("non_existent_dir_123")
+    assert "error" in res
+    assert "Target directory not found" in res["error"]
+
+    # Test a real target directory (e.g. sample_target_agent)
+    import os
+
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+    target_path = os.path.join(project_root, "sample_target_agent")
+    res = parse_target_directory(target_path)
+    assert "error" not in res
+    assert res["target_dir"] == target_path
+    assert "agent.py" in res["combined_code"]
+    assert len(res["instructions"]) > 0
